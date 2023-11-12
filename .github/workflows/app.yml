@@ -1,0 +1,75 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.sha }}
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Lint
+      run: npm run lint
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.sha }}
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run tests
+      run: npm test
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.sha }}
+
+    - name: Build and push Docker image
+      run: |
+        echo ${{ secrets.AWS_ACCESS_KEY_ID }} | docker login -u AWS --password-stdin ${{ secrets.AWS_REGISTRY_URL }}
+        docker build -t ${{ secrets.AWS_REGISTRY_URL }}/your-repo-name:latest .
+        docker push ${{ secrets.AWS_REGISTRY_URL }}/your-repo-name:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.sha }}
+
+    - name: Deploy to PROD environment
+      run: |
+        # Add your deployment script or commands
+
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.sha }}
+
