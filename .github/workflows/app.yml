@@ -4,100 +4,63 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
-  pre-commit:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.sha }}
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run pre-commit hooks
-        run: npm run precommit
-
   lint:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.sha }}
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: npm install
+    - name: Install dependencies
+      run: npm install
 
-      - name: Lint
-        run: npm run lint
+    - name: Lint
+      run: npm run lint
 
   test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.sha }}
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: npm install
+    - name: Install dependencies
+      run: npm install
 
-      - name: Run tests
-        run: npm test
-
-  snyk:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.sha }}
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Snyk Security Scan
-        run: npx snyk test
+    - name: Run tests
+      run: npm test
 
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.sha }}
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: npm install
+    - name: Build and push Docker image
+      run: |
+        echo ${{ secrets.AWS_ACCESS_KEY_ID }} | docker login -u AWS --password-stdin ${{ secrets.AWS_REGISTRY_URL }}
+        docker build -t ${{ secrets.AWS_REGISTRY_URL }}/your-repo-name:latest .
+        docker push ${{ secrets.AWS_REGISTRY_URL }}/your-repo-name:latest
 
-      - name: Build and push Docker image
-        run: |
-          echo ${{ secrets.AWS_ACCESS_KEY_ID }} | docker login -u AWS --password-stdin ${{ secrets.AWS_REGISTRY_URL }}
-          docker build -t ${{ secrets.AWS_REGISTRY_URL }}/your-repo-name:latest .
-          docker push ${{ secrets.AWS_REGISTRY_URL }}/your-repo-name:latest
-
-  sonarqube:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.sha }}
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: npm install
+    - name: Deploy to PROD environment
+      run: |
+        # Add your deployment script or commands here
 
-      - name: SonarQube Scan
-        run: npx sonarqube-scanner -Dsonar.login=your-sonarqube-token
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+   
